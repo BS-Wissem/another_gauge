@@ -1,7 +1,7 @@
 # another_gauge
 Fully customizable Gauge widget for Flutter
 
-<img src="https://github.com/BS-Wissem/another_gauge/raw/master/GaugeExample.png" height="480px" >
+<img src="https://github.com/BS-Wissem/another_gauge/blob/main/GaugeExample.png" height="480px" >
 
 ## Installing:
 In your pubspec.yaml, add the following dependency
@@ -28,6 +28,7 @@ PrettyGauge(
 ```
 ## Features:
 * Fully featured Gauge widget that is forked from pretty_gauge
+  https://github.com/JErazo7/gauge
 
 
 ## License:
