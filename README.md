@@ -27,8 +27,7 @@ PrettyGauge(
 
 ```
 ## Features:
-* Fully featured Gauge widget that is forked from pretty_gauge
-  https://github.com/JErazo7/gauge
+* Fully featured Gauge widget
 
 
 ## License:
