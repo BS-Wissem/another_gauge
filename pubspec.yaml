@@ -1,6 +1,6 @@
 name: another_gauge
 description: Fully customizable Gauge widget for Flutter
-version: 1.0.0
+version: 1.0.2
 homepage: https://github.com/BS-Wissem/another_gauge
 
 environment:
