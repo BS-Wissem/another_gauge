@@ -7,27 +7,8 @@ Fully customizable Gauge widget for Flutter
 In your pubspec.yaml, add the following dependency
 ```yaml
 dependencies:
-  another_gauge: 1.0.0
+  another_gauge: 1.0.3
 ```
-
-## Example Usage:
-```dart
-import 'package:another_gauge/another_gauge.dart';
-
-PrettyGauge(
-    gaugeSize: 200,
-    segments: [
-        GaugeSegment('Low', 20, Colors.red),
-        GaugeSegment('Medium', 40, Colors.orange),
-        GaugeSegment('High', 40, Colors.green),
-    ],
-    currentValue: 46,
-    displayWidget: Text('Fuel in tank', style: TextStyle(fontSize: 12)),
-),
-
-```
-## Features:
-* Fully featured Gauge widget
 
 
 ## License:

@@ -1,5 +1,5 @@
-name: customgauge_example
-description: Demonstrates how to use the customgauge plugin.
+name: another_gauge_example
+description: Demonstrates how to use the another_gauge plugin.
 publish_to: 'none'
 
 environment:
