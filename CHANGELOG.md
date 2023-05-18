@@ -3,5 +3,11 @@
 * First version
 
 ## 1.0.3
-Bug fixes
-Added ValueListenableBuilder
+* Bug fixes
+* Added ValueListenableBuilder
+
+## 1.0.4
+* Bug fix for a null faceBorderColor
+
+## 1.0.5
+* Added borderOffset

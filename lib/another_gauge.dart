@@ -272,10 +272,10 @@ class CirclePainter extends CustomPainter {
       ..color = capBorderColor!
       ..strokeWidth = capBorderWidth!
       ..style = PaintingStyle.stroke;
-    canvas.drawCircle(center, radius, paintFaceBorder);
     canvas.drawCircle(center, radius, paintFace);
-    canvas.drawCircle(center, capSize*.5, paintCapBorder);
+    canvas.drawCircle(center, radius-borderWidth!*.5, paintFaceBorder);
     canvas.drawCircle(center, capSize*.5, paintCap);
+    canvas.drawCircle(center, capSize*.5, paintCapBorder);
   }
 
   @override
@@ -285,7 +285,6 @@ class CirclePainter extends CustomPainter {
 class ArcPainter extends CustomPainter {
   ArcPainter( {
     required this.strokeWidth,
-    required this.radius,
     this.startAngle = 0,
     this.sweepAngle = 0,
     this.showSubTicks = true,
@@ -293,7 +292,6 @@ class ArcPainter extends CustomPainter {
     this.color = Colors.grey,
   });
   final double strokeWidth;
-  final double radius;
   final double startAngle;
   final double sweepAngle;
   final Color color;
@@ -390,7 +388,8 @@ class ChildSizeNotifier extends StatelessWidget {
 class AnotherGauge extends StatefulWidget {
   ///Size of the widget - This widget is rendered in a square shape
   final double gaugeSize;
-
+  ///Offset border from gauge face
+  final double borderOffset;
   ///Supply the list of segments in the Gauge.
   ///
   ///If nothing is supplied, the gauge will have one segment with a segment size of (Max Value - Min Value)
@@ -438,7 +437,7 @@ class AnotherGauge extends StatefulWidget {
 
   ///Custom styling for the Max marker. Defaults to black font with size 10
   final TextStyle endMarkerStyle;
-  final double? strokeWidth;
+  final double? segmentWidth;
 
   /// Cap settings
   final Color? capColor;
@@ -477,6 +476,7 @@ class AnotherGauge extends StatefulWidget {
     Key? key,
     required this.valueNotifier,
     this.gaugeSize = 200,
+    this.borderOffset=16,
     this.segments,
     this.minValue = 0,
     this.maxValue = 100.0,
@@ -489,7 +489,7 @@ class AnotherGauge extends StatefulWidget {
     this.valueSymbol = '',
     this.displayWidget,
     this.showMarkers = true,
-    this.strokeWidth = 10,
+    this.segmentWidth = 10,
     this.startMarkerStyle = const TextStyle(fontSize: 10, color: Colors.black),
     this.endMarkerStyle = const TextStyle(fontSize: 10, color: Colors.black),
     this.faceStartColor = Colors.cyan,
@@ -530,11 +530,11 @@ class AnotherGaugeState extends State<AnotherGauge> {
 
   //This method builds out multiple arcs that make up the Gauge
   //using data supplied in the segments property
-  List<Widget> buildGauge(List<GaugeSegment> segments, double radius) {
+  List<Widget> buildGauge(List<GaugeSegment> segments, width, height) {
     List<CustomPaint> paint = [];
     double cumulativeSegmentSize = 0.0;
     double gaugeSpread = widget.maxValue - widget.minValue;
-    //double minDimension = size.width > size.height ? size.height : size.width;
+
     //Iterate through the segments collection in reverse order
     //First paint the arc with the last segment color, then paint multiple arcs in sequence until we reach the first segment
 
@@ -542,26 +542,34 @@ class AnotherGaugeState extends State<AnotherGauge> {
     //multiple segments
     paint.add(
       CustomPaint(
-        size: Size(widget.gaugeSize, widget.gaugeSize),
+        size: Size(width, height),
         painter: CirclePainter(
           startColor: widget.faceStartColor!,
           endColor: widget.faceEndColor!,
           borderColor: widget.faceBorderColor?? Colors.transparent,
-          borderWidth: widget.faceBorderWidth?? 0,
-          capColor: widget.rangeNeedleColor? needleColor!: widget.capColor?? Colors.blueGrey,
-          capSize: widget.capSize?? widget.gaugeSize*.1,
-          capBorderColor: widget.capBorderColor?? widget.capColor?? Colors.blueGrey,
+          borderWidth: widget.faceBorderWidth,
+          capColor: widget.rangeNeedleColor? needleColor!: widget.capColor?? Colors.blueGrey[800]!,
+          capSize: widget.capSize?? widget.gaugeSize*.25,
+          capBorderColor: widget.capBorderColor?? widget.capColor?? Colors.white,
           capBorderWidth: widget.capBorderWidth! ,
         ),
       ),
     );
+    // paint.add(
+    //   CustomPaint(
+    //     size: Size(widget.capSize!, widget.capSize!),
+    //     painter: CirclePainter(
+    //         startColor: widget.capColor!,
+    //         endColor: widget.capBorderColor?? widget.capColor!,
+    //     ),
+    //   ),
+    // );
     for (var segment in segments.reversed) {
       paint.add(
         CustomPaint(
-          size: Size(widget.gaugeSize, widget.gaugeSize),
+          size: Size(width, height),
           painter: ArcPainter(
-              radius: radius,
-              strokeWidth: widget.strokeWidth!,
+              strokeWidth: widget.segmentWidth!,
               startAngle: 0.75 * pi,
               sweepAngle: 1.5 *
                   ((gaugeSpread - cumulativeSegmentSize) / gaugeSpread) *
@@ -575,12 +583,12 @@ class AnotherGaugeState extends State<AnotherGauge> {
     if (widget.showMainTicks) {
       paint.add(
           CustomPaint(
-              size: Size(widget.gaugeSize, widget.gaugeSize),
+              size: Size(width, height),
               painter: MainTicksPainter(
                   color: widget.mainTicksColor,
                   width: widget.mainTickWidth,
                   length: widget.mainTicksLength,
-                  offset: widget.strokeWidth! + widget.faceBorderWidth!
+                  offset: widget.segmentWidth! + widget.faceBorderWidth!
               )
           )
       );
@@ -588,12 +596,12 @@ class AnotherGaugeState extends State<AnotherGauge> {
     if (widget.showSubTicks) {
       paint.add(
           CustomPaint(
-              size: Size(widget.gaugeSize, widget.gaugeSize),
+              size: Size(width, height),
               painter: SubTicksPainter(
                   color: widget.subTicksColor,
                   width: widget.subTickWidth,
                   length: widget.subTicksLength,
-                  offset: widget.strokeWidth! + widget.faceBorderWidth!)
+                  offset: widget.segmentWidth! + widget.faceBorderWidth!)
           )
       );
     }
@@ -647,148 +655,157 @@ class AnotherGaugeState extends State<AnotherGauge> {
       valueListenable: widget.valueNotifier,
       builder: (context, value, child) {
         updateData();
-        return SizedBox(
-          height: widget.gaugeSize,
-          width: widget.gaugeSize,
-          child: Stack(
-            children: <Widget>[
-              //frame
-              widget.showFrame?
-              Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: widget.frameColor,
-                        width: widget.frameWidth,
-                      ),
-                      //borderRadius: const BorderRadius.all(Radius.circular(20))
-                      borderRadius: BorderRadius.only(bottomRight:Radius.circular(widget.gaugeSize / 2),
-                          bottomLeft:Radius.circular(widget.gaugeSize / 2),
-                          topRight: const Radius.circular(20), topLeft: const Radius.circular(20))
-                  ),
-                ),
-              ) : const SizedBox(),
-              //face
-              // Center(
-              //   child: Container(
-              //     width: radius,
-              //     height: radius,
-              //     decoration: BoxDecoration(
-              //       gradient: RadialGradient(
-              //         colors: [
-              //           widget.faceStartColor!,
-              //           widget.faceEndColor!,
-              //         ],
-              //       ),
-              //       shape: BoxShape.circle,
-              //       color: Colors.teal,
-              //       border: Border.all(
-              //         width: widget.faceBorderWidth!,
-              //         color: widget.faceBorderColor?? Colors.blueGrey[900]!,
-              //       ),
-              //       //borderRadius: const BorderRadius.all(Radius.circular(20))
-              //     ),
-              //   ),
-              // ),
-              // //cap
-              // Center(
-              //   child: Container(
-              //     width: widget.capSize ?? widget.gaugeSize *0.15,
-              //     height: widget.capSize ?? widget.gaugeSize *0.15,
-              //     decoration: BoxDecoration(
-              //       shape: BoxShape.circle,
-              //       color: widget.rangeNeedleColor? needleColor : widget.capColor?? Colors.blueGrey[800],
-              //       border: Border.all(
-              //         width: widget.capBorderWidth!,
-              //         color: widget.capBorderColor?? Colors.white,
-              //       ),
-              //       //borderRadius: const BorderRadius.all(Radius.circular(20))
-              //     ),
-              //   ),
-              // ),
-              //segments
-              ...buildGauge(segments!, radius-widget.mainTicksLength),
-              // widget.showMarkers
-              //     ? CustomPaint(
-              //     size: Size(widget.gaugeSize, widget.gaugeSize),
-              //     painter: GaugeMarkerPainter(
-              //         widget.minValue.toString(),
-              //         Offset(widget.gaugeSize * 0.2, widget.gaugeSize * 0.7),
-              //         widget.startMarkerStyle))
-              //     : Container(),
-              // widget.showMarkers
-              //     ? CustomPaint(
-              //     size: Size(widget.gaugeSize, widget.gaugeSize),
-              //     painter: GaugeMarkerPainter(
-              //         widget.maxValue.toString(),
-              //         Offset(widget.gaugeSize*0.7, widget.gaugeSize*0.7),
-              //         widget.endMarkerStyle))
-              //     : Container(),
-              //needle
-              Container(
-                height: widget.gaugeSize,
-                width: widget.gaugeSize,
-                alignment: Alignment.center,
-                child: Transform.rotate(
-                  angle: (pi / 4) +
-                      ((gaugeValue! - widget.minValue) /
-                          (widget.maxValue - widget.minValue) *
-                          1.5 *
-                          pi),
-                  child: ClipPath(
-                    clipper: GaugeNeedleClipper(),
-                    child: Container(
-                      width: widget.gaugeSize*.7- widget.mainTicksLength,
-                      height: widget.gaugeSize*.7- widget.mainTicksLength,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: needleColor,
-                      ),
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(
+              height: widget.gaugeSize+widget.borderOffset,
+              width: widget.gaugeSize+widget.borderOffset,
+              child: Stack(
+                children: [
+                  widget.showFrame?
+                  Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: widget.frameColor,
+                          width: widget.frameWidth,
+                        ),
+                        //borderRadius: const BorderRadius.all(Radius.circular(20))
+                        borderRadius: BorderRadius.only(bottomRight:Radius.circular((widget.gaugeSize+widget.borderOffset) / 2),
+                            bottomLeft:Radius.circular((widget.gaugeSize+widget.borderOffset) / 2),
+                            topRight: const Radius.circular(20), topLeft: const Radius.circular(20))
                     ),
-                  ),
-                ),
-              ),
-              //title and value
-              Container(
-                height: widget.gaugeSize,
-                width: widget.gaugeSize,
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children:[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0,8,0,0),
-                      child: widget.displayWidget ?? Container(),
-                    ),
-                    SizedBox(height: widget.capSize,),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0,0,0,0),
-                      child: widget.valueWidget ??
-                          Text(
-                            widget.valueNotifier.value.toStringAsFixed(currentValueDecimalPlaces) + widget.valueSymbol,
-                            style: TextStyle(color: widget.valueFontColor, fontSize: widget.valueFontSize, fontWeight: FontWeight.bold),
+                  ) : const SizedBox(),
+                  Padding(
+                    padding: EdgeInsets.all(widget.borderOffset),
+                    child: Stack(
+                      children: <Widget>[
+                        //face
+                        // Center(
+                        //   child: Container(
+                        //     width: radius,
+                        //     height: radius,
+                        //     decoration: BoxDecoration(
+                        //       gradient: RadialGradient(
+                        //         colors: [
+                        //           widget.faceStartColor!,
+                        //           widget.faceEndColor!,
+                        //         ],
+                        //       ),
+                        //       shape: BoxShape.circle,
+                        //       color: Colors.teal,
+                        //       border: Border.all(
+                        //         width: widget.faceBorderWidth!,
+                        //         color: widget.faceBorderColor?? Colors.blueGrey[900]!,
+                        //       ),
+                        //       //borderRadius: const BorderRadius.all(Radius.circular(20))
+                        //     ),
+                        //   ),
+                        // ),
+                        // //cap
+                        // Center(
+                        //   child: Container(
+                        //     width: widget.capSize ?? widget.gaugeSize *0.15,
+                        //     height: widget.capSize ?? widget.gaugeSize *0.15,
+                        //     decoration: BoxDecoration(
+                        //       shape: BoxShape.circle,
+                        //       color: widget.rangeNeedleColor? needleColor : widget.capColor?? Colors.blueGrey[800],
+                        //       border: Border.all(
+                        //         width: widget.capBorderWidth!,
+                        //         color: widget.capBorderColor?? Colors.white,
+                        //       ),
+                        //       //borderRadius: const BorderRadius.all(Radius.circular(20))
+                        //     ),
+                        //   ),
+                        // ),
+                        //segments
+                        ...buildGauge(segments!,constraints.maxWidth,constraints.maxHeight),
+                        // widget.showMarkers
+                        //     ? CustomPaint(
+                        //     size: Size(widget.gaugeSize, widget.gaugeSize),
+                        //     painter: GaugeMarkerPainter(
+                        //         widget.minValue.toString(),
+                        //         Offset(widget.gaugeSize * 0.2, widget.gaugeSize * 0.7),
+                        //         widget.startMarkerStyle))
+                        //     : Container(),
+                        // widget.showMarkers
+                        //     ? CustomPaint(
+                        //     size: Size(widget.gaugeSize, widget.gaugeSize),
+                        //     painter: GaugeMarkerPainter(
+                        //         widget.maxValue.toString(),
+                        //         Offset(widget.gaugeSize*0.7, widget.gaugeSize*0.7),
+                        //         widget.endMarkerStyle))
+                        //     : Container(),
+                        //needle
+                        Container(
+                          height: widget.gaugeSize+widget.borderOffset,
+                          width: widget.gaugeSize+widget.borderOffset,
+                          alignment: Alignment.center,
+                          child: Transform.rotate(
+                            angle: (pi / 4) +
+                                ((gaugeValue! - widget.minValue) /
+                                    (widget.maxValue - widget.minValue) *
+                                    1.5 *
+                                    pi),
+                            child: ClipPath(
+                              clipper: GaugeNeedleClipper(),
+                              child: Container(
+                                width: widget.gaugeSize*.7- widget.mainTicksLength,
+                                height: widget.gaugeSize*.7- widget.mainTicksLength,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: needleColor,
+                                ),
+                              ),
+                            ),
                           ),
-                    ),
-                  ],
-                ),
-              ),
-              widget.showMarkers
-                  ? Container(
-                      height: widget.gaugeSize*.75,
-                      width: widget.gaugeSize,
-                      alignment: Alignment.bottomCenter,
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(widget.minValue.toString()),
-                                Text(widget.maxValue.toString()),
-                                //const SizedBox(width: 16,),
-                              ],
+                        ),
+                        //title and value
+                        Container(
+                          height: widget.gaugeSize+widget.borderOffset,
+                          width: widget.gaugeSize+widget.borderOffset,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children:[
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0,16,0,0),
+                                child: widget.displayWidget ?? Container(),
+                              ),
+                              SizedBox(height: widget.capSize,),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0,0,0,0),
+                                child: widget.valueWidget ??
+                                    Text(
+                                      widget.valueNotifier.value.toStringAsFixed(currentValueDecimalPlaces) + widget.valueSymbol,
+                                      style: TextStyle(color: widget.valueFontColor, fontSize: widget.valueFontSize, fontWeight: FontWeight.bold),
+                                    ),
+                              ),
+                            ],
                           ),
-                  )
-                  :  const SizedBox(),
-            ],
-          ),
+                        ),
+                        widget.showMarkers
+                            ? Container(
+                                height: widget.gaugeSize*.75,
+                                width: widget.gaugeSize,
+                                alignment: Alignment.bottomCenter,
+                                    child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(widget.minValue.toString()),
+                                          Text(widget.maxValue.toString()),
+                                          //const SizedBox(width: 16,),
+                                        ],
+                                    ),
+                            )
+                            :  const SizedBox(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
         );
       }
     );
