@@ -1,6 +1,6 @@
 name: another_gauge
 description: Another customizable Gauge widget for Flutter, with automatic needle and cap ranged color
-version: 1.0.5
+version: 1.0.6
 homepage: https://github.com/BS-Wissem/another_gauge
 
 environment:

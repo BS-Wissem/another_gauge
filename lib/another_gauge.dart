@@ -1,7 +1,5 @@
 library another_gauge;
-//from library another_gauge 1.0.0
 
-// ignore_for_file: must_be_immutable
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -407,6 +405,9 @@ class AnotherGauge extends StatefulWidget {
   ///Current value of the Gauge
   final ValueNotifier valueNotifier;
 
+  ///Gauge title
+  final String title;
+
   ///Current value decimal point places
   final int currentValueDecimals;
 
@@ -487,6 +488,7 @@ class AnotherGauge extends StatefulWidget {
     this.valueFontSize = 10,
     this.valueFontColor = Colors.black,
     this.valueSymbol = '',
+    this.title = '',
     this.displayWidget,
     this.showMarkers = true,
     this.segmentWidth = 10,
@@ -621,7 +623,7 @@ class AnotherGaugeState extends State<AnotherGauge> {
       bool colorUpdated = false;
       for (var segment in segments!) {
         totalSegmentSize = totalSegmentSize + segment.segmentSize;
-        if (widget.rangeNeedleColor && (widget.valueNotifier.value! <= totalSegmentSize)) {
+        if (widget.rangeNeedleColor && (gaugeValue! <= totalSegmentSize)) {
           if (!colorUpdated) {
             needleColor = segment.segmentColor;
             colorUpdated = true;
@@ -649,7 +651,7 @@ class AnotherGaugeState extends State<AnotherGauge> {
       currentValueDecimalPlaces = 20;
     }
     //If segments is supplied, validate that the sum of all segment sizes = (maxValue - minValue)
-    double radius = widget.gaugeSize * 0.9;
+    //double radius = widget.gaugeSize * 0.9;
 
     return ValueListenableBuilder(
       valueListenable: widget.valueNotifier,
@@ -680,6 +682,31 @@ class AnotherGaugeState extends State<AnotherGauge> {
                     padding: EdgeInsets.all(widget.borderOffset),
                     child: Stack(
                       children: <Widget>[
+                        ...buildGauge(segments!,constraints.maxWidth,constraints.maxHeight),
+                        widget.showMarkers
+                            ? Container(
+                                height: widget.gaugeSize-widget.mainTicksLength-widget.faceBorderWidth!,
+                                width: widget.gaugeSize,
+                                alignment: Alignment.bottomCenter,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    SizedBox(height: 8,),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(0,16,0,0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(widget.minValue.toString()),
+                                          Text(widget.maxValue.toString()),
+                                          //const SizedBox(width: 16,),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            :  const SizedBox(),
                         //face
                         // Center(
                         //   child: Container(
@@ -719,7 +746,6 @@ class AnotherGaugeState extends State<AnotherGauge> {
                         //   ),
                         // ),
                         //segments
-                        ...buildGauge(segments!,constraints.maxWidth,constraints.maxHeight),
                         // widget.showMarkers
                         //     ? CustomPaint(
                         //     size: Size(widget.gaugeSize, widget.gaugeSize),
@@ -766,39 +792,23 @@ class AnotherGaugeState extends State<AnotherGauge> {
                           width: widget.gaugeSize+widget.borderOffset,
                           alignment: Alignment.center,
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children:[
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(0,16,0,0),
-                                child: widget.displayWidget ?? Container(),
+                                padding: EdgeInsets.fromLTRB(0,(widget.capSize!/2)+widget.mainTicksLength,0,0),
+                                child: widget.displayWidget ?? Text(widget.title,style: TextStyle(color: widget.valueFontColor,)),
                               ),
-                              SizedBox(height: widget.capSize,),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(0,0,0,0),
+                                padding: EdgeInsets.fromLTRB(0,0,0,(widget.capSize!/2)+widget.mainTicksLength),
                                 child: widget.valueWidget ??
-                                    Text(
-                                      widget.valueNotifier.value.toStringAsFixed(currentValueDecimalPlaces) + widget.valueSymbol,
-                                      style: TextStyle(color: widget.valueFontColor, fontSize: widget.valueFontSize, fontWeight: FontWeight.bold),
+                                    Text(widget.valueNotifier.value.toStringAsFixed(currentValueDecimalPlaces) +' '+widget.valueSymbol,
+                                      style: TextStyle(color: widget.valueFontColor, fontSize: widget.valueFontSize, fontWeight: FontWeight.bold)
                                     ),
                               ),
+                              //SizedBox(height: widget.capSize,),
                             ],
                           ),
                         ),
-                        widget.showMarkers
-                            ? Container(
-                                height: widget.gaugeSize*.75,
-                                width: widget.gaugeSize,
-                                alignment: Alignment.bottomCenter,
-                                    child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text(widget.minValue.toString()),
-                                          Text(widget.maxValue.toString()),
-                                          //const SizedBox(width: 16,),
-                                        ],
-                                    ),
-                            )
-                            :  const SizedBox(),
                       ],
                     ),
                   ),

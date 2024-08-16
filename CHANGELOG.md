@@ -11,3 +11,7 @@
 
 ## 1.0.5
 * Added borderOffset
+
+## 1.0.6
+* Added title
+* Bug fixes

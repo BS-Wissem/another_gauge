@@ -21,13 +21,16 @@ class _MyAppState extends State<MyApp> {
           ),
           body: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(onPressed: () { valueNotifier.value +=15;}, child: Text('Increment')),
-                  SizedBox(width: 16,),
-                  ElevatedButton(onPressed: () { valueNotifier.value -=15;}, child: Text('Decrement')),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(onPressed: () { valueNotifier.value +=15;}, child: Text('Increment')),
+                    SizedBox(width: 16,),
+                    ElevatedButton(onPressed: () { valueNotifier.value -=15;}, child: Text('Decrement')),
+                  ],
+                ),
               ),
               Expanded(
                 child: Container(
@@ -36,28 +39,32 @@ class _MyAppState extends State<MyApp> {
                       child: AnotherGauge(
                           valueNotifier: valueNotifier,
                           capBorderColor: Colors.white,
-                          capBorderWidth: 5,
+                          capBorderWidth: 10,
                           capColor: Colors.white10,
-                          faceBorderColor: Colors.blueGrey[800],
-                          faceStartColor: Colors.blueGrey,
-                          //faceEndColor: Colors.blueAccent,
+                          faceBorderColor: Colors.blueGrey.shade800,
+                          faceStartColor: Colors.teal,
+                          faceEndColor: Colors.cyan,
                           faceBorderWidth: 15,
                           subTicksColor: Colors.white,
                           needleColor: Colors.white,
                           mainTicksColor: Colors.red,
                           rangeNeedleColor: true,
-                          segmentWidth: 5,
+                          frameColor: Colors.blueGrey.shade600,
+                          segmentWidth: 15,
                           showFrame: true,
-                          gaugeSize: 256,
-                          capSize: 50,
+                          gaugeSize: 350,
+                          capSize: 80,
                           segments: [
                             GaugeSegment('Low', 200, Colors.green),
                             GaugeSegment('Medium', 40, Colors.orange),
                             GaugeSegment('High', 20, Colors.red),
                           ],
-                          valueSymbol: ' km/h',
-                          displayWidget: const Text('Speed',
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                          valueSymbol: 'km/h',
+                          displayWidget: Padding(
+                            padding: const EdgeInsets.only(top:16.0),
+                            child: const Text('Speed',
+                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
                           maxValue: 260,
                       ),
                     ),

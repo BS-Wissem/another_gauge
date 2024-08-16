@@ -7,7 +7,7 @@ Fully customizable Gauge widget for Flutter
 In your pubspec.yaml, add the following dependency
 ```yaml
 dependencies:
-  another_gauge: 1.0.5
+  another_gauge: 1.0.6
 ```
 
 
