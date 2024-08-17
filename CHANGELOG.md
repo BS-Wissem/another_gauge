@@ -15,3 +15,7 @@
 ## 1.0.6
 * Added title
 * Bug fixes
+
+## 1.0.7
+Added property showMainTickValue
+Min and Max values color is taking widget.mainTicksColor

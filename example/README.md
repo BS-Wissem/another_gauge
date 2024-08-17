@@ -1,6 +1,6 @@
 # another_gauge example
 
-Demonstrates how to use the another_gauge plugin.
+Demonstrates how to use the another_gauge widget.
 
 ## Getting Started
 
