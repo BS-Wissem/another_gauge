@@ -1,3 +1,12 @@
+## 1.0.8
+* Added property mainTicksStep
+* Added property subTicksStep
+* Added property valuePadding
+* Added property frameAngle
+* Added property needleStartAngle and needleSweepAngle
+* Added property frameAngle
+* Bug fixes
+
 ## 1.0.7
 * Added property showMainTickValue
 * Min and Max values color is taking widget.mainTicksColor
