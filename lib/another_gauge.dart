@@ -4,8 +4,18 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+///Class that holds the details of each segment on a CustomGauge with automatic value assignment
+class GaugeRange {
+  final Color color;
+  final String? name;
+  final double? position;
+  double? size;
+  GaugeRange(this.color,{this.name, this.position, this.size});
+}
+
 ///Class that holds the details of each segment on a CustomGauge
-class GaugeSegment {
+///@Deprecated('Use AutoGaugeSegment')
+class GaugeSegment implements Exception {
   final String segmentName;
   final double segmentSize;
   final Color segmentColor;
@@ -41,8 +51,8 @@ class SubTicksPainter extends CustomPainter {
     this.width = 3,
     this.length = 0,
     this.step = 5,
-    this.minValue =0,
-    this.maxValue =100,
+    this.minValue = 0,
+    this.maxValue = 100,
   });
 
   final double offset;
@@ -64,7 +74,7 @@ class SubTicksPainter extends CustomPainter {
 
     double start = size.width / 2;
     double end = size.width / 2;
-    double tickAngle = sweepAngle*step/(maxValue-minValue);
+    double tickAngle = sweepAngle * step / (maxValue - minValue);
     double minDimension = size.width > size.height ? size.height : size.width;
     var mRadius = minDimension / 2 - offset - 8;
     start -= mRadius;
@@ -74,13 +84,16 @@ class SubTicksPainter extends CustomPainter {
     canvas.translate(size.width / 2, size.height / 2);
     canvas.rotate(-pi);
     canvas.translate(-size.width / 2, -size.height / 2);
-    var angles = [for (var i = startAngle; i <= startAngle + sweepAngle; i += tickAngle) i];
+    var angles = [
+      for (var i = startAngle; i <= startAngle + sweepAngle; i += tickAngle) i
+    ];
     for (double angle in angles) {
       canvas.save();
       canvas.translate(size.width / 2, size.height / 2);
       canvas.rotate(degToRad(angle));
       canvas.translate(-size.width / 2, -size.height / 2);
-      canvas.drawLine(Offset(start, size.height / 2), Offset(end, size.height / 2), tickPaint);
+      canvas.drawLine(Offset(start, size.height / 2),
+          Offset(end, size.height / 2), tickPaint);
       canvas.restore();
     }
 
@@ -89,7 +102,8 @@ class SubTicksPainter extends CustomPainter {
       canvas.translate(size.width / 2, size.height / 2);
       canvas.rotate(degToRad(angle));
       canvas.translate(-size.width / 2, -size.height / 2);
-      canvas.drawLine(Offset(start, size.height / 2), Offset(end, size.height / 2), tickPaint);
+      canvas.drawLine(Offset(start, size.height / 2),
+          Offset(end, size.height / 2), tickPaint);
       canvas.restore();
     }
 
@@ -114,8 +128,8 @@ class MainTicksPainter extends CustomPainter {
     this.showValue = false,
     this.showMarkers = true,
     this.gaugeSpread = 100.0,
-    this.minValue =0,
-    this.maxValue =100,
+    this.minValue = 0,
+    this.maxValue = 100,
     this.fontSize = 16,
     this.valuePadding = 8,
   });
@@ -148,49 +162,75 @@ class MainTicksPainter extends CustomPainter {
     var mRadius = minDimension / 2 - offset - 8;
     start -= mRadius;
     end -= mRadius - length;
-    double tickAngle = sweepAngle*step/(maxValue-minValue);
+    double tickAngle = sweepAngle * step / (maxValue - minValue);
     canvas.save();
     canvas.translate(size.width / 2, size.height / 2);
     canvas.rotate(-pi);
     canvas.translate(-size.width / 2, -size.height / 2);
-    List<double> angles = [for (double i = startAngle; i <= startAngle + sweepAngle; i += tickAngle) i];
+    List<double> angles = [
+      for (double i = startAngle; i <= startAngle + sweepAngle; i += tickAngle)
+        i
+    ];
     //List<double> angles = List.generate(tickCount, (index) => index + step * 1.0);
     for (double angle in angles) {
       canvas.save();
       canvas.translate(size.width / 2, size.height / 2);
       canvas.rotate(degToRad(angle));
       canvas.translate(-size.width / 2, -size.height / 2);
-      canvas.drawLine(Offset(start, size.height / 2), Offset(end, size.height / 2), tickPaint);
+      canvas.drawLine(Offset(start, size.height / 2),
+          Offset(end, size.height / 2), tickPaint);
       canvas.restore();
     }
-    int count =0;
+    int count = 0;
     for (double angle in angles) {
       canvas.save();
       canvas.translate(size.width / 2, size.height / 2);
       canvas.rotate(degToRad(angle));
       canvas.translate(-size.width / 2, -size.height / 2);
-      canvas.drawLine(Offset(start, size.height / 2), Offset(end, size.height / 2), tickPaint);
-      double tickValue =count*step+minValue;
-      if (angle==angles.first) tickValue=minValue;
-      if (angle==angles.last) tickValue=maxValue;
-      Offset valueOffset = Offset(end+valuePadding, (size.height / 2)-valuePadding);
+      canvas.drawLine(Offset(start, size.height / 2),
+          Offset(end, size.height / 2), tickPaint);
+      double tickValue = count * step + minValue;
+      if (angle == angles.first) tickValue = minValue;
+      if (angle == angles.last) tickValue = maxValue;
+      Offset valueOffset =
+          Offset(end + valuePadding, (size.height / 2) - valuePadding);
       if (showValue) {
-        TextSpan textSpan = TextSpan(text: '$tickValue',
-          style: TextStyle(color: color, fontSize: fontSize,),);
+        TextSpan textSpan = TextSpan(
+          text: '$tickValue',
+          style: TextStyle(
+            color: color,
+            fontSize: fontSize,
+          ),
+        );
         final textPainter = TextPainter(
-          text: textSpan, textDirection: TextDirection.ltr,);
-        textPainter.layout(minWidth: 0, maxWidth: size.width,);
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout(
+          minWidth: 0,
+          maxWidth: size.width,
+        );
         final pivot = textPainter.size.center(valueOffset);
         canvas.translate(pivot.dx, pivot.dy);
         canvas.rotate(degToRad(180 - angle));
         canvas.translate(-pivot.dx, -pivot.dy);
         textPainter.paint(canvas, valueOffset);
       } else if (showMarkers && angle == angles.first || angle == angles.last) {
-        TextSpan textSpan = TextSpan(text: '$tickValue',
-          style: TextStyle(color: color, fontSize: fontSize,),);
+        TextSpan textSpan = TextSpan(
+          text: '$tickValue',
+          style: TextStyle(
+            color: color,
+            fontSize: fontSize,
+          ),
+        );
         final textPainter = TextPainter(
-          text: textSpan, textDirection: TextDirection.ltr,);
-        textPainter.layout(minWidth: 0, maxWidth: size.width,);
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout(
+          minWidth: 0,
+          maxWidth: size.width,
+        );
         final pivot = textPainter.size.center(valueOffset);
         canvas.translate(pivot.dx, pivot.dy);
         canvas.rotate(degToRad(180 - angle));
@@ -231,7 +271,8 @@ class CirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final radius = min(size.width, size.height) * .5;
     final Offset center = Offset(size.width / 2, size.height / 2);
-    final rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: radius);
+    final rect = Rect.fromCircle(
+        center: Offset(size.width / 2, size.height / 2), radius: radius);
     final Gradient gradient = RadialGradient(
       colors: <Color>[
         startColor,
@@ -284,7 +325,9 @@ class ArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final dim = min(size.width, size.height);
-    final rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: dim * .5 - strokeWidth);
+    final rect = Rect.fromCircle(
+        center: Offset(size.width / 2, size.height / 2),
+        radius: dim * .5 - strokeWidth);
     final Gradient gradient = RadialGradient(
       colors: <Color>[
         color,
@@ -312,7 +355,8 @@ class ArcPainter extends CustomPainter {
 }
 
 class CustomTextPainter extends CustomPainter {
-  CustomTextPainter({required this.text, required this.offset, required this.textStyle});
+  CustomTextPainter(
+      {required this.text, required this.offset, required this.textStyle});
 
   final String text;
   final TextStyle textStyle;
@@ -320,9 +364,18 @@ class CustomTextPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final textSpan = TextSpan(text: text, style: textStyle,);
-    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr,);
-    textPainter.layout(minWidth: 0, maxWidth: size.width,);
+    final textSpan = TextSpan(
+      text: text,
+      style: textStyle,
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
     textPainter.paint(canvas, offset);
   }
 
@@ -374,11 +427,19 @@ class AnotherGauge extends StatefulWidget {
   ///Each segment is represented by a GaugeSegment object that has a name, segment size and color
   final List<GaugeSegment>? segments;
 
+  ///List of ranges in the Gauge.
+  ///
+  ///If nothing is supplied, the gauge will have one range (Max Value - Min Value)
+  ///painted in defaultSegmentColor
+  ///Each segment is represented by a GaugeRange object that has a color
+  final List<GaugeRange>? ranges;
+
   ///Supply a min value for the Gauge. Defaults to 0
   final double minValue;
 
   ///Supply a max value for the Gauge. Defaults to 100
   final double maxValue;
+
   /// Needle start angle 0 is located at 3 o'clock
   final double needleStartAngle;
 
@@ -388,6 +449,7 @@ class AnotherGauge extends StatefulWidget {
   final double mainTicksValuePadding;
 
   final double mainTicksFontSize;
+
   ///Current value of the Gauge
   final ValueNotifier valueNotifier;
 
@@ -410,6 +472,7 @@ class AnotherGauge extends StatefulWidget {
   final double? valueFontSize;
   final Color? valueFontColor;
   final EdgeInsets? valuePadding;
+
   /// Add a symbol to value example %, PSI etc
   final String valueSymbol;
 
@@ -450,6 +513,7 @@ class AnotherGauge extends StatefulWidget {
   final double frameWidth;
   final double frameAngle;
   final Color frameColor;
+  final Color frameBackgroundColor;
   final Widget? frameWidget;
 
   /// Ticks settings
@@ -468,7 +532,9 @@ class AnotherGauge extends StatefulWidget {
     required this.valueNotifier,
     this.gaugeSize = 200,
     this.borderOffset = 16,
+    @Deprecated('Use autoSegments')
     this.segments,
+    this.ranges,
     this.minValue = 0,
     this.maxValue = 100.0,
     this.needleStartAngle = 135,
@@ -502,12 +568,13 @@ class AnotherGauge extends StatefulWidget {
     this.showFrame = true,
     this.frameWidget,
     this.mainTicksValuePadding = 8,
-    this.mainTicksFontSize =16,
+    this.mainTicksFontSize = 16,
     this.mainTicksStep = 45,
     //this.subTicksStep = 5,
     this.frameWidth = 5,
     this.frameAngle = 0,
     this.frameColor = Colors.blueGrey,
+    this.frameBackgroundColor = Colors.transparent,
     this.mainTicksColor = Colors.white,
     this.mainTickWidth = 6,
     this.mainTicksLength = 15,
@@ -520,6 +587,7 @@ class AnotherGauge extends StatefulWidget {
 class AnotherGaugeState extends State<AnotherGauge> {
   Color? needleColor;
   List<GaugeSegment>? segments;
+  List<GaugeRange>? ranges;
   double? gaugeValue;
 
   @override
@@ -527,6 +595,32 @@ class AnotherGaugeState extends State<AnotherGauge> {
     super.initState();
     needleColor = widget.needleColor;
     segments = widget.segments;
+    ranges = widget.ranges;
+    //temporary mode until segment will be removed
+    if (ranges!=null) {
+      segments = [];
+      double totalRange = widget.maxValue - widget.minValue;
+      int sizeNotAssignedCount = 0;
+      widget.ranges!.asMap().forEach((index, r) {
+        double priorSize =0;
+        if (index>0) priorSize = widget.ranges![index-1].position?? 0;
+        //TODO fix use with position instead of size
+        if (r.position!=null && false) {
+          totalRange-= r.position! - priorSize;
+        } else if (r.size !=null) {
+          totalRange-= r.size!;
+        } else {
+          sizeNotAssignedCount++;
+        }
+      });
+
+      for (GaugeRange r in widget.ranges!) {
+        if (r.size==null && sizeNotAssignedCount!=0) {
+          r.size=totalRange/sizeNotAssignedCount;
+        }
+        segments!.add(GaugeSegment(r.name?? '', r.size!, r.color));
+      }
+    }
     gaugeValue = widget.valueNotifier.value;
   }
 
@@ -550,9 +644,12 @@ class AnotherGaugeState extends State<AnotherGauge> {
           endColor: widget.faceEndColor!,
           borderColor: widget.faceBorderColor ?? Colors.transparent,
           borderWidth: widget.faceBorderWidth,
-          capColor: widget.rangeNeedleColor ? needleColor! : widget.capColor ?? Colors.blueGrey[800]!,
+          capColor: widget.rangeNeedleColor
+              ? needleColor!
+              : widget.capColor ?? Colors.blueGrey[800]!,
           capSize: widget.capSize ?? widget.gaugeSize * .25,
-          capBorderColor: widget.capBorderColor ?? widget.capColor ?? Colors.white,
+          capBorderColor:
+              widget.capBorderColor ?? widget.capColor ?? Colors.white,
           capBorderWidth: widget.capBorderWidth!,
         ),
       ),
@@ -575,7 +672,9 @@ class AnotherGaugeState extends State<AnotherGauge> {
               //startAngle: widget.needleStartAngle,
               //sweepAngle: widget.needleSweepAngle,
               startAngle: degToRad(widget.needleStartAngle),
-              sweepAngle: ((gaugeSpread - cumulativeSegmentSize) / gaugeSpread) * degToRad(widget.needleSweepAngle),
+              sweepAngle:
+                  ((gaugeSpread - cumulativeSegmentSize) / gaugeSpread) *
+                      degToRad(widget.needleSweepAngle),
               color: segment.segmentColor),
         ),
       );
@@ -638,12 +737,15 @@ class AnotherGaugeState extends State<AnotherGauge> {
           }
         }
       }
-      if (totalSegmentSize != (widget.maxValue - widget.minValue)) {
+      if (totalSegmentSize!=0 && totalSegmentSize != (widget.maxValue - widget.minValue)) {
         throw Exception('Total segment size must equal (Max Size - Min Size)');
       }
     } else {
       //If no segments are supplied, default to one segment with default color
-      segments = [GaugeSegment('', (widget.maxValue - widget.minValue), widget.defaultSegmentColor)];
+      segments = [
+        GaugeSegment(
+            '', (widget.maxValue - widget.minValue), widget.defaultSegmentColor)
+      ];
     }
   }
 
@@ -666,49 +768,62 @@ class AnotherGaugeState extends State<AnotherGauge> {
           updateData();
           return ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: widget.gaugeSize + widget.borderOffset,
-              maxWidth: widget.gaugeSize + widget.borderOffset
-            ),
+                maxHeight: widget.gaugeSize + widget.borderOffset,
+                maxWidth: widget.gaugeSize + widget.borderOffset),
             child: Stack(
               alignment: Alignment.center,
               children: [
                 widget.showFrame
                     ? Transform.rotate(
-                      angle: degToRad(widget.frameAngle),
-                      child: Container(
+                        angle: degToRad(widget.frameAngle),
+                        child: Container(
                           width: widget.gaugeSize + widget.borderOffset,
                           height: widget.gaugeSize + widget.borderOffset,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
+                              color: widget.frameBackgroundColor,
                               border: Border.all(
                                 color: widget.frameColor,
                                 width: widget.frameWidth,
                               ),
                               //borderRadius: const BorderRadius.all(Radius.circular(20))
                               borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular((widget.gaugeSize + widget.borderOffset) / 2),
-                                  bottomLeft: Radius.circular((widget.gaugeSize + widget.borderOffset) / 2),
+                                  bottomRight: Radius.circular(
+                                      (widget.gaugeSize + widget.borderOffset) /
+                                          2),
+                                  bottomLeft: Radius.circular(
+                                      (widget.gaugeSize + widget.borderOffset) /
+                                          2),
                                   topRight: const Radius.circular(20),
                                   topLeft: const Radius.circular(20))),
                         ),
-                    )
+                      )
                     : const SizedBox(),
                 Padding(
                   padding: EdgeInsets.all(widget.borderOffset),
                   child: Stack(
                     children: <Widget>[
-                      ...buildGauge(segments!, widget.gaugeSize+widget.borderOffset, widget.gaugeSize+widget.borderOffset),
+                      ...buildGauge(
+                          segments!,
+                          widget.gaugeSize + widget.borderOffset,
+                          widget.gaugeSize + widget.borderOffset),
                       Container(
                         height: widget.gaugeSize + widget.borderOffset,
                         width: widget.gaugeSize + widget.borderOffset,
                         alignment: Alignment.center,
                         child: Transform.rotate(
-                          angle: degToRad(widget.needleStartAngle) -pi/2 + ((gaugeValue! - widget.minValue) / (widget.maxValue - widget.minValue) * degToRad(widget.needleSweepAngle)) ,
+                          angle: degToRad(widget.needleStartAngle) -
+                              pi / 2 +
+                              ((gaugeValue! - widget.minValue) /
+                                  (widget.maxValue - widget.minValue) *
+                                  degToRad(widget.needleSweepAngle)),
                           child: ClipPath(
                             clipper: GaugeNeedleClipper(),
                             child: Container(
-                              width: widget.gaugeSize * .7 - widget.mainTicksLength,
-                              height: widget.gaugeSize * .7 - widget.mainTicksLength,
+                              width: widget.gaugeSize * .7 -
+                                  widget.mainTicksLength,
+                              height: widget.gaugeSize * .7 -
+                                  widget.mainTicksLength,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: needleColor,
@@ -726,7 +841,12 @@ class AnotherGaugeState extends State<AnotherGauge> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Padding(
-                              padding: EdgeInsets.fromLTRB(0, (widget.capSize! / 2) + widget.mainTicksLength, 0, 0),
+                              padding: EdgeInsets.fromLTRB(
+                                  0,
+                                  (widget.capSize! / 2) +
+                                      widget.mainTicksLength,
+                                  0,
+                                  0),
                               child: widget.displayWidget ??
                                   Text(widget.title,
                                       style: TextStyle(
@@ -734,9 +854,18 @@ class AnotherGaugeState extends State<AnotherGauge> {
                                       )),
                             ),
                             Padding(
-                              padding: widget.valuePadding?? EdgeInsets.fromLTRB(0, 0, 0, (widget.capSize! / 2) + widget.mainTicksLength),
+                              padding: widget.valuePadding ??
+                                  EdgeInsets.fromLTRB(
+                                      0,
+                                      0,
+                                      0,
+                                      (widget.capSize! / 2) +
+                                          widget.mainTicksLength),
                               child: widget.valueWidget ??
-                                  Text(widget.valueNotifier.value.toStringAsFixed(currentValueDecimalPlaces) +
+                                  Text(
+                                      widget.valueNotifier.value
+                                              .toStringAsFixed(
+                                                  currentValueDecimalPlaces) +
                                           ' ' +
                                           widget.valueSymbol,
                                       style: TextStyle(

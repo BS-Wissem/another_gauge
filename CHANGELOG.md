@@ -1,3 +1,7 @@
+## 1.1.0
+* segments is deprecated use ranges instead
+
+
 ## 1.0.8
 * Added property mainTicksStep
 * Added property subTicksStep
@@ -28,12 +32,3 @@
 
 ## 1.0.0
 * First version
-
-
-
-
-
-
-
-
-
